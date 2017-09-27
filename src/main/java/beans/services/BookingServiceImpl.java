@@ -31,10 +31,10 @@ public class BookingServiceImpl implements BookingService {
     private final UserService       userService;
     private final BookingDAO        bookingDAO;
     private final DiscountService   discountService;
-    final         int               minSeatNumber;
-    final         double            vipSeatPriceMultiplier;
-    final         double            highRatedPriceMultiplier;
-    final         double            defaultRateMultiplier;
+    private final int               minSeatNumber;
+    private final double            vipSeatPriceMultiplier;
+    private final double            highRatedPriceMultiplier;
+    private final double            defaultRateMultiplier;
 
     @Autowired
     public BookingServiceImpl(@Qualifier("eventServiceImpl") EventService eventService,
@@ -138,8 +138,9 @@ public class BookingServiceImpl implements BookingService {
         }
 
         List<Ticket> bookedTickets = bookingDAO.getTickets(ticket.getEvent());
-        boolean seatsAreAlreadyBooked = bookedTickets.stream().filter(bookedTicket -> ticket.getSeatsList().stream().filter(
-                bookedTicket.getSeatsList() :: contains).findAny().isPresent()).findAny().isPresent();
+        boolean seatsAreAlreadyBooked = bookedTickets.stream()
+                .anyMatch(bookedTicket -> ticket.getSeatsList().stream()
+                        .anyMatch(bookedTicket.getSeatsList()::contains));
 
         if (!seatsAreAlreadyBooked)
             bookingDAO.create(user, ticket);
